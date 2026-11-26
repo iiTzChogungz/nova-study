@@ -34,7 +34,7 @@ export default function DeleteDocButton({ id }: { id: string }) {
   return (
     <button
       onClick={handleDelete}
-      title={confirm ? 'Click again to confirm delete' : 'Delete document'}
+      title={confirm ? 'กดอีกครั้งเพื่อยืนยันการลบ' : 'ลบเอกสาร'}
       className={`absolute bottom-4 right-4 p-1.5 rounded-lg transition-all z-10 ${
         confirm
           ? 'bg-red-100 text-red-600 ring-2 ring-red-400 scale-110'

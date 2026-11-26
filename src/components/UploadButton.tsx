@@ -41,6 +41,7 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (file.size > 10 * 1024 * 1024) { setError('ไฟล์ใหญ่เกิน 10MB'); return }
 
     setIsUploading(true)
     setIsDone(false)
@@ -60,7 +61,7 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Upload failed')
+        throw new Error(data.error || 'อัปโหลดไม่สำเร็จ')
       }
 
       // If we reach here, it's a success
@@ -93,7 +94,7 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
     <>
       <button onClick={() => { setIsOpen(true); setError(null); setIsDone(false); }} className={styles[variant]}>
         <Plus className="w-5 h-5" />
-        Upload Document
+        อัปโหลดเอกสาร
       </button>
 
       {isOpen && (
@@ -105,8 +106,8 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
               </button>
             )}
             
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Document</h2>
-            <p className="text-sm text-gray-500 mb-8">AI will analyze and learn from your file.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">อัปโหลดเอกสาร</h2>
+            <p className="text-sm text-gray-500 mb-8">AI จะอ่านและเรียนรู้จากไฟล์ของคุณ</p>
 
             {error && (
               <div className="mb-6 p-4 bg-red-50 text-red-600 text-sm rounded-2xl border border-red-100 flex items-start gap-3 animate-in slide-in-from-top-2">
@@ -121,14 +122,14 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
                   type="file"
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   onChange={handleUpload}
-                  accept=".pdf,.png,.jpg,.jpeg,.txt"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp,.txt"
                 />
                 <div className="pointer-events-none flex flex-col items-center gap-4">
                   <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Plus className="w-8 h-8" />
                   </div>
-                  <p className="font-bold text-gray-700">Click to upload file</p>
-                  <p className="text-xs text-gray-400 font-medium">PDF, Image or TXT (Max 10MB)</p>
+                  <p className="font-bold text-gray-700">คลิกเพื่อเลือกไฟล์</p>
+                  <p className="text-xs text-gray-400 font-medium">PDF, รูปภาพ หรือ TXT (ไม่เกิน 10MB)</p>
                 </div>
               </div>
             ) : (
@@ -141,7 +142,7 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
                        <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
                      )}
                      <span className="font-bold text-gray-900">
-                       {isDone ? 'Upload Complete!' : 'AI is processing...'}
+                       {isDone ? 'อัปโหลดสำเร็จ!' : 'กำลังอัปโหลด...'}
                      </span>
                    </div>
                    <span className="text-2xl font-black text-gray-300">{Math.round(progress)}%</span>
@@ -155,7 +156,7 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
                 </div>
                 
                 <p className="text-center text-xs text-gray-400 mt-6 font-medium">
-                  {isDone ? 'Refreshing your dashboard...' : 'Please don\'t close this window while we analyze your document.'}
+                  {isDone ? 'กำลังรีเฟรช...' : 'อย่าปิดหน้านี้ขณะอัปโหลด'}
                 </p>
               </div>
             )}
@@ -165,7 +166,7 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
                 onClick={() => setIsOpen(false)}
                 className="w-full mt-6 py-4 text-sm font-bold text-gray-400 hover:text-gray-600 transition-colors"
               >
-                Cancel
+                ยกเลิก
               </button>
             )}
           </div>

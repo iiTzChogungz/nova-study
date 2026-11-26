@@ -2,59 +2,42 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import DocumentViewer from './DocumentViewer'
 import Link from 'next/link'
-import { ChevronLeft, GraduationCap } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
+import { storagePath } from '@/lib/storage'
+import { getPlan } from '@/lib/usage'
 
 export default async function DocumentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: doc } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  const { data: conversations } = await supabase
-    .from('conversations')
-    .select('*')
-    .eq('document_id', id)
-    .order('created_at', { ascending: true })
-
+  const { data: doc } = await supabase.from('documents').select('*').eq('id', id).eq('user_id', user.id).single()
   if (!doc) redirect('/dashboard')
 
+  const { data: history } = await supabase
+    .from('conversations')
+    .select('id, action, message, response, created_at')
+    .eq('document_id', id)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true })
+
+  // Bucket is private: hand the browser a short-lived signed URL for the preview.
+  const { data: signed } = await supabase.storage.from('documents').createSignedUrl(storagePath(doc.file_url), 3600)
+  const plan = await getPlan(user.id)
+
+  const { content, file_url: _omit, ...safeDoc } = doc
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Top Navbar */}
-      <nav className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="p-2 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-900 transition-all">
-            <ChevronLeft className="w-6 h-6" />
-          </Link>
-          <div className="h-6 w-[1px] bg-slate-200"></div>
-          <div className="flex items-center gap-2 font-black text-blue-600 tracking-tight text-lg">
-            <GraduationCap className="w-6 h-6" />
-            Nova Study
-          </div>
-        </div>
-
-        <div className="hidden md:block">
-          <h1 className="font-bold text-slate-900 text-sm max-w-[300px] truncate">{doc.title}</h1>
-        </div>
-
-        <div className="flex items-center gap-4">
-           <span className="text-[10px] font-bold px-3 py-1 bg-blue-50 text-blue-600 rounded-full uppercase">
-             Study Lab
-           </span>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto p-4 md:p-8">
-        <DocumentViewer document={doc} initialConversations={conversations || []} />
+    <div className="max-w-7xl mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <Link href="/dashboard" className="p-2 hover:bg-white rounded-xl text-slate-400 hover:text-slate-900 transition-all"><ChevronLeft className="w-6 h-6" /></Link>
+        <h1 className="font-bold text-slate-900 truncate">{doc.title}</h1>
       </div>
+      <DocumentViewer
+        document={{ ...safeDoc, previewUrl: signed?.signedUrl ?? null, hasContent: !!content, failed: !!content?.startsWith('ERROR:'), text: content && !content.startsWith('ERROR:') ? content.slice(0, 20000) : '' }}
+        history={history || []}
+        plan={plan}
+      />
     </div>
   )
 }

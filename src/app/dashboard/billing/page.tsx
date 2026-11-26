@@ -1,103 +1,89 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import { Check, Loader2, Sparkles } from 'lucide-react'
+import { PRICING, PLAN_LIMITS } from '@/lib/plans'
 
-export default function BillingPage() {
-  const [isLoading, setIsLoading] = useState(false)
+function Billing() {
+  const [loading, setLoading] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [interval, setInterval] = useState<'monthly' | 'yearly'>('yearly')
+  const params = useSearchParams()
 
-  const handleUpgrade = async () => {
-    setIsLoading(true)
+  const go = async (url: string, key: string, body?: object) => {
+    setLoading(key); setError(null)
     try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-      })
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })
       const data = await res.json()
-      
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        throw new Error(data.error || 'Failed to create checkout session')
-      }
-    } catch (error) {
-      console.error(error)
-      alert('Failed to start checkout process')
-    } finally {
-      setIsLoading(false)
-    }
+      if (data.url) window.location.href = data.url
+      else throw new Error(data.error || 'เกิดข้อผิดพลาด')
+    } catch (e: any) { setError(e.message); setLoading(null) }
   }
 
+  const f = PLAN_LIMITS.free, p = PLAN_LIMITS.pro
+  const price = PRICING[interval]
+
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div className="max-w-4xl mx-auto py-4">
+      {params.get('success') && <div className="mb-6 p-4 rounded-2xl bg-green-50 text-green-800 font-medium">🎉 ชำระเงินสำเร็จ! แพ็กเกจ Pro จะเปิดใช้งานภายในไม่กี่วินาที (รีเฟรชหน้านี้หากยังไม่เปลี่ยน)</div>}
+      {params.get('canceled') && <div className="mb-6 p-4 rounded-2xl bg-slate-100 text-slate-700">ยกเลิกการชำระเงินแล้ว คุณสามารถลองใหม่ได้ทุกเมื่อ</div>}
+      {error && <div className="mb-6 p-4 rounded-2xl bg-red-50 text-red-700">{error}</div>}
+
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Upgrade to Pro</h1>
-        <p className="text-gray-500 mt-2">Unlock the full potential of Rocket Learn.</p>
+        <h1 className="text-3xl font-black text-slate-900">เลือกแพ็กเกจของคุณ</h1>
+        <p className="text-slate-500 mt-2">ยกเลิกได้ทุกเมื่อ ชำระเงินปลอดภัยผ่าน Stripe</p>
+        <div className="inline-flex mt-5 p-1 bg-slate-100 rounded-full text-sm font-bold">
+          {(['monthly', 'yearly'] as const).map((k) => (
+            <button key={k} onClick={() => setInterval(k)} className={`px-5 py-2 rounded-full transition-colors ${interval === k ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}>
+              {k === 'monthly' ? 'รายเดือน' : 'รายปี −17%'}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-        {/* Free Plan */}
-        <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm relative">
-          <h2 className="text-xl font-semibold mb-2">Free Plan</h2>
-          <div className="text-4xl font-bold mb-6">0 THB<span className="text-lg text-gray-500 font-normal">/mo</span></div>
-          
-          <ul className="space-y-4 mb-8">
-            <li className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>3 File Uploads per day</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>20 AI Queries per day</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-green-500" />
-              <span>Basic Summaries</span>
-            </li>
+        <div className="bg-white rounded-3xl p-8 border border-slate-200">
+          <h2 className="text-xl font-bold mb-2">Free</h2>
+          <div className="text-4xl font-black mb-6">฿0</div>
+          <ul className="space-y-3 mb-8 text-slate-700">
+            <li className="flex gap-3"><Check className="w-5 h-5 text-green-500 shrink-0" />อัปโหลด {f.upload} ไฟล์/วัน</li>
+            <li className="flex gap-3"><Check className="w-5 h-5 text-green-500 shrink-0" />คำสั่ง AI {f.query} ครั้ง/วัน</li>
+            <li className="flex gap-3"><Check className="w-5 h-5 text-green-500 shrink-0" />สรุปย่อ ข้อสอบ แฟลชการ์ด ถาม-ตอบ</li>
           </ul>
-
-          <button disabled className="w-full py-3 px-4 bg-gray-100 text-gray-500 font-medium rounded-xl cursor-not-allowed">
-            Current Plan
-          </button>
+          <Link href="/dashboard" className="block text-center w-full py-3 bg-slate-100 text-slate-600 font-bold rounded-xl">เริ่มใช้งานฟรี</Link>
         </div>
 
-        {/* Pro Plan */}
-        <div className="bg-blue-600 rounded-3xl p-8 border border-blue-500 shadow-xl relative text-white transform md:-translate-y-4">
-          <div className="absolute top-0 right-0 bg-gradient-to-r from-orange-400 to-pink-500 text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-3xl uppercase tracking-wider">
-            Most Popular
-          </div>
-          <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
-            Pro Plan <Sparkles className="w-5 h-5 text-yellow-300" />
-          </h2>
-          <div className="text-4xl font-bold mb-6">99 THB<span className="text-lg text-blue-200 font-normal">/mo</span></div>
-          
-          <ul className="space-y-4 mb-8 text-blue-50">
-            <li className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-blue-200" />
-              <span>50 File Uploads per month</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-blue-200" />
-              <span>500 AI Queries per month</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-blue-200" />
-              <span>Detailed Summaries (GPT-4o)</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <Check className="w-5 h-5 text-blue-200" />
-              <span>Advanced Lab Reports</span>
-            </li>
+        <div className="bg-blue-600 rounded-3xl p-8 shadow-xl text-white md:-translate-y-3 relative">
+          <span className="absolute top-0 right-0 bg-gradient-to-r from-orange-400 to-pink-500 text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-3xl">ยอดนิยม</span>
+          <h2 className="text-xl font-bold mb-2 flex items-center gap-2">Pro <Sparkles className="w-5 h-5 text-yellow-300" /></h2>
+          <div className="text-4xl font-black mb-1">฿{price.amount}<span className="text-lg text-blue-200 font-normal">/{interval === 'monthly' ? 'เดือน' : 'ปี'}</span></div>
+          {interval === 'yearly' && <p className="text-blue-100 text-sm mb-4">เฉลี่ย ฿{Math.round(price.amount / 12)}/เดือน</p>}
+          <ul className="space-y-3 mb-8 mt-4 text-blue-50">
+            <li className="flex gap-3"><Check className="w-5 h-5 shrink-0" />อัปโหลด {p.upload} ไฟล์/เดือน</li>
+            <li className="flex gap-3"><Check className="w-5 h-5 shrink-0" />คำสั่ง AI {p.query} ครั้ง/เดือน</li>
+            <li className="flex gap-3"><Check className="w-5 h-5 shrink-0" />สรุปละเอียดด้วยโมเดลระดับสูง</li>
+            <li className="flex gap-3"><Check className="w-5 h-5 shrink-0" />สร้างรายงาน / Lab Report</li>
           </ul>
-
-          <button 
-            onClick={handleUpgrade}
-            disabled={isLoading}
-            className="w-full py-3 px-4 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg shadow-blue-900/20 active:scale-[0.98] flex items-center justify-center"
-          >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Upgrade Now'}
+          <button onClick={() => go('/api/stripe/checkout', 'up', { interval })} disabled={!!loading}
+            className="w-full py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 flex items-center justify-center">
+            {loading === 'up' ? <Loader2 className="w-5 h-5 animate-spin" /> : 'อัปเกรดเลย'}
           </button>
         </div>
       </div>
+
+      <p className="text-center mt-10 text-sm text-slate-500">
+        เป็นสมาชิก Pro อยู่แล้ว?{' '}
+        <button onClick={() => go('/api/stripe/portal', 'portal')} className="font-bold text-blue-600 underline">
+          {loading === 'portal' ? 'กำลังเปิด…' : 'จัดการการสมัคร / ยกเลิก / ใบเสร็จ'}
+        </button>
+      </p>
     </div>
   )
+}
+
+export default function BillingPage() {
+  return <Suspense><Billing /></Suspense>
 }

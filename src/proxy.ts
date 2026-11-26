@@ -39,7 +39,8 @@ export async function proxy(request: NextRequest) {
   // Define protected routes
   const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || 
                            request.nextUrl.pathname.startsWith('/api/ai') ||
-                           request.nextUrl.pathname.startsWith('/api/usage')
+                           request.nextUrl.pathname.startsWith('/api/upload') ||
+                           request.nextUrl.pathname.startsWith('/api/documents')
 
   // Define auth routes
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 

@@ -2,85 +2,91 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { signOut } from '@/app/(auth)/actions'
-import { Rocket, FileText, Settings, LogOut, CreditCard } from 'lucide-react'
+import { getUsage } from '@/lib/usage'
+import { GraduationCap, LayoutDashboard, Settings, LogOut, CreditCard, Sparkles } from 'lucide-react'
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const NAV = [
+  { href: '/dashboard', label: 'เอกสารของฉัน', icon: LayoutDashboard },
+  { href: '/dashboard/billing', label: 'แพ็กเกจ', icon: CreditCard },
+  { href: '/dashboard/settings', label: 'ตั้งค่า', icon: Settings },
+]
+
+function Bar({ label, used, limit }: { label: string; used: number; limit: number }) {
+  const pct = Math.min((used / limit) * 100, 100)
+  return (
+    <div>
+      <div className="flex justify-between text-xs mb-1.5 font-medium text-slate-400">
+        <span>{label}</span>
+        <span>{used}/{limit}</span>
+      </div>
+      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${pct >= 100 ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  )
+}
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return redirect('/login')
-  }
+  const usage = await getUsage(user.id)
+  const per = usage.period === 'day' ? 'วันนี้' : 'เดือนนี้'
 
   return (
-    <div className="min-h-screen bg-gray-50/50 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col hidden md:flex">
-        <div className="h-16 flex items-center px-6 border-b border-gray-200">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-blue-600">
-            <Rocket className="w-6 h-6" />
-            Rocket Learn
+    <div className="min-h-screen bg-[#F8FAFC] lg:flex">
+      <aside className="hidden lg:flex w-72 bg-white border-r border-slate-200 flex-col sticky top-0 h-screen">
+        <div className="p-8">
+          <Link href="/dashboard" className="flex items-center gap-2 text-2xl font-black text-blue-600 tracking-tight">
+            <GraduationCap className="w-8 h-8" /> Nova Study
           </Link>
         </div>
-        
-        <nav className="flex-1 px-4 py-6 space-y-1">
-          <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg bg-blue-50 text-blue-700">
-            <FileText className="w-5 h-5" />
-            My Documents
-          </Link>
-          <Link href="/dashboard/billing" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-            <CreditCard className="w-5 h-5" />
-            Billing
-          </Link>
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-            <Settings className="w-5 h-5" />
-            Settings
-          </Link>
+        <nav className="flex-1 px-4 space-y-1">
+          {NAV.map((n) => (
+            <Link key={n.href} href={n.href} className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-blue-50 hover:text-blue-700 rounded-xl font-semibold transition-colors">
+              <n.icon className="w-5 h-5" /> {n.label}
+            </Link>
+          ))}
         </nav>
-
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-3 mb-4 px-3">
-            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-              {user.email?.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {user.email}
-              </p>
-            </div>
+        <div className="p-6 m-4 bg-slate-900 rounded-2xl text-white">
+          <div className="flex items-center gap-2 mb-4 text-blue-400">
+            <Sparkles className="w-4 h-4" />
+            <span className="text-xs font-bold uppercase tracking-wider">โควตา{per}</span>
           </div>
+          <div className="space-y-4">
+            <Bar label="อัปโหลด" used={usage.uploads.used} limit={usage.uploads.limit} />
+            <Bar label="คำสั่ง AI" used={usage.queries.used} limit={usage.queries.limit} />
+            <p className="text-[11px] text-slate-400">
+              แพ็กเกจ: <span className="text-blue-400 font-bold uppercase">{usage.plan}</span>
+            </p>
+            {usage.plan !== 'pro' && (
+              <Link href="/dashboard/billing" className="block text-center py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold transition-colors">
+                อัปเกรดเป็น Pro
+              </Link>
+            )}
+          </div>
+        </div>
+        <div className="px-6 pb-6 flex items-center justify-between gap-2">
+          <p className="text-xs text-slate-500 truncate">{user.email}</p>
           <form action={signOut}>
-            <button className="flex w-full items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50 transition-colors">
-              <LogOut className="w-5 h-5" />
-              Sign Out
-            </button>
+            <button className="text-slate-400 hover:text-red-600" title="ออกจากระบบ"><LogOut className="w-5 h-5" /></button>
           </form>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-gray-200 md:hidden">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-blue-600">
-            <Rocket className="w-6 h-6" />
-          </Link>
-          <form action={signOut}>
-            <button className="text-gray-500 hover:text-gray-700">
-              <LogOut className="w-5 h-5" />
-            </button>
-          </form>
+      <div className="flex-1 min-w-0">
+        <header className="lg:hidden flex items-center justify-between gap-3 px-4 h-14 bg-white border-b border-slate-200 sticky top-0 z-40">
+          <Link href="/dashboard" className="flex items-center gap-2 font-black text-blue-600"><GraduationCap className="w-6 h-6" /> Nova</Link>
+          <nav className="flex items-center gap-1">
+            {NAV.map((n) => (
+              <Link key={n.href} href={n.href} title={n.label} className="p-2 text-slate-500 hover:text-blue-600"><n.icon className="w-5 h-5" /></Link>
+            ))}
+            <form action={signOut}><button className="p-2 text-slate-400 hover:text-red-600"><LogOut className="w-5 h-5" /></button></form>
+          </nav>
         </header>
-        <div className="flex-1 overflow-y-auto p-6 md:p-8">
-          {children}
-        </div>
-      </main>
+        <main className="p-4 lg:p-10">{children}</main>
+      </div>
     </div>
   )
 }
