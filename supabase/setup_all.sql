@@ -142,3 +142,6 @@ create policy "Users can delete their own documents"
 -- Stripe bookkeeping
 alter table public.users add column if not exists stripe_customer_id text;
 create index if not exists users_stripe_customer_idx on public.users (stripe_customer_id);
+
+-- Trigger function must not be callable through the REST API.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
