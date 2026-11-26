@@ -1,50 +1,19 @@
-import { geminiModel } from './gemini'
+import { generate, FAST_MODEL } from './gemini'
 
 export async function extractTextFromFile(file: File): Promise<string> {
+  const clean = (t: string) => t.replace(/\u0000/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim()
+
+  if (file.type === 'text/plain') return clean(await file.text())
+
   try {
-    console.log(`Extracting text from ${file.name} using Gemini...`)
-
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const base64File = buffer.toString('base64')
-
-    // 1. For Images & PDFs: Use Gemini's multi-modal capabilities
-    // Gemini can handle PDF and Image directly
-    const result = await geminiModel.generateContent([
-      "Extract all text from this file accurately. If it's Thai, extract Thai correctly. Return only the extracted text.",
-      {
-        inlineData: {
-          data: base64File,
-          mimeType: file.type
-        }
-      }
+    const base64 = Buffer.from(await file.arrayBuffer()).toString('base64')
+    const text = await generate(FAST_MODEL, [
+      'Extract all text from this file accurately, preserving headings and structure. If it is Thai, extract Thai correctly. Return only the extracted text.',
+      { inlineData: { data: base64, mimeType: file.type } },
     ])
-
-    const text = result.response.text()
-    
-    // Clean up
-    const cleanedText = text
-      .replace(/\u0000/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-
-    console.log(`Gemini Extraction complete. Length: ${cleanedText.length}`)
-    return cleanedText
-
+    return clean(text)
   } catch (error) {
-    console.error('Gemini Extraction Error:', error)
-    
-    // Fallback for simple PDFs if Gemini fails
-    if (file.type === 'application/pdf') {
-       try {
-         const pdf = require('pdf-extraction')
-         const buffer = Buffer.from(await file.arrayBuffer())
-         const data = await pdf(buffer)
-         return data.text
-       } catch (e) {
-         return ""
-       }
-    }
-    
-    return ""
+    console.error('Gemini extraction error:', error)
+    return ''
   }
 }
