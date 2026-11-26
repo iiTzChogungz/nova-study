@@ -3,11 +3,12 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { signOut } from '@/app/(auth)/actions'
 import { getUsage } from '@/lib/usage'
+import { BILLING_ENABLED } from '@/lib/plans'
 import { GraduationCap, LayoutDashboard, Settings, LogOut, CreditCard, Sparkles } from 'lucide-react'
 
 const NAV = [
   { href: '/dashboard', label: 'เอกสารของฉัน', icon: LayoutDashboard },
-  { href: '/dashboard/billing', label: 'แพ็กเกจ', icon: CreditCard },
+  ...(BILLING_ENABLED ? [{ href: '/dashboard/billing', label: 'แพ็กเกจ', icon: CreditCard }] : []),
   { href: '/dashboard/settings', label: 'ตั้งค่า', icon: Settings },
 ]
 
@@ -57,10 +58,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="space-y-4">
             <Bar label="อัปโหลด" used={usage.uploads.used} limit={usage.uploads.limit} />
             <Bar label="คำสั่ง AI" used={usage.queries.used} limit={usage.queries.limit} />
-            <p className="text-[11px] text-slate-400">
-              แพ็กเกจ: <span className="text-blue-400 font-bold uppercase">{usage.plan}</span>
-            </p>
-            {usage.plan !== 'pro' && (
+            {BILLING_ENABLED && usage.plan !== 'pro' && (
               <Link href="/dashboard/billing" className="block text-center py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-xs font-bold transition-colors">
                 อัปเกรดเป็น Pro
               </Link>

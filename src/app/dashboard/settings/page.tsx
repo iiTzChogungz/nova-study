@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getUsage } from '@/lib/usage'
+import { BILLING_ENABLED } from '@/lib/plans'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -17,6 +18,7 @@ export default async function SettingsPage() {
           <p className="text-sm text-slate-500 mb-1">อีเมล</p>
           <p className="font-semibold text-slate-900">{user.email}</p>
         </div>
+        {BILLING_ENABLED && (
         <div className="p-6 flex items-center justify-between">
           <div>
             <p className="text-sm text-slate-500 mb-1">แพ็กเกจปัจจุบัน</p>
@@ -26,6 +28,7 @@ export default async function SettingsPage() {
             {usage.plan === 'pro' ? 'จัดการแพ็กเกจ' : 'อัปเกรดเป็น Pro'}
           </Link>
         </div>
+        )}
         <div className="p-6 text-sm text-slate-500 flex gap-4">
           <Link href="/terms" className="underline">ข้อกำหนดการใช้งาน</Link>
           <Link href="/privacy" className="underline">นโยบายความเป็นส่วนตัว</Link>

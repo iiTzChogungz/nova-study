@@ -3,8 +3,13 @@ export const APP_NAME = 'Nova Study'
 export type PlanId = 'free' | 'pro'
 export type BillingInterval = 'monthly' | 'yearly'
 
+// Launch mode: everything is free for everyone. Flip to true (and set Stripe env) to monetize later.
+export const BILLING_ENABLED = false
+
 export const PLAN_LIMITS = {
-  free: { upload: 3, query: 20, period: 'day' as const },
+  free: BILLING_ENABLED
+    ? { upload: 3, query: 20, period: 'day' as const }
+    : { upload: 5, query: 40, period: 'day' as const },
   pro: { upload: 50, query: 500, period: 'month' as const },
 }
 

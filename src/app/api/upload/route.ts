@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ไฟล์ใหญ่เกิน 10MB' }, { status: 400 })
     }
     if (!(await checkUsageLimit(user.id, 'upload'))) {
-      return NextResponse.json({ error: 'ใช้โควตาอัปโหลดครบแล้ว — อัปเกรดเป็น Pro เพื่ออัปโหลดเพิ่ม', code: 'LIMIT' }, { status: 403 })
+      return NextResponse.json({ error: 'ใช้โควตาอัปโหลดของวันนี้ครบแล้ว กลับมาใหม่พรุ่งนี้นะ', code: 'LIMIT' }, { status: 403 })
     }
 
     const path = `${user.id}/${crypto.randomUUID()}.${EXT[file.type]}`

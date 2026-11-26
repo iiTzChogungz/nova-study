@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { BILLING_ENABLED } from '@/lib/plans'
 import { stripe, appUrl } from '@/lib/stripe'
 
 // Stripe Customer Portal: lets Pro users cancel / update card / see invoices.
 export async function POST() {
+  if (!BILLING_ENABLED) return NextResponse.json({ error: 'Billing is disabled' }, { status: 404 })
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

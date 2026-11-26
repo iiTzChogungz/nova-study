@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(url),
   title: { default: 'Nova Study | ติวเตอร์ AI ส่วนตัว สรุป ออกข้อสอบ จากไฟล์ของคุณ', template: '%s | Nova Study' },
   description: 'อัปโหลด PDF รูปภาพ หรือโน้ต แล้วให้ AI สรุปบทเรียน ออกข้อสอบ ทำแฟลชการ์ด และตอบคำถามจากเอกสารของคุณ ใช้ฟรี เริ่มได้ทันที',
-  keywords: ['AI ติวเตอร์', 'สรุปบทเรียน', 'ออกข้อสอบ AI', 'แฟลชการ์ด', 'สรุป PDF', 'Nova Study'],
+  alternates: { canonical: '/' },
+  robots: { index: true, follow: true },
+  keywords: ['AI ติวเตอร์', 'สรุปบทเรียน', 'ออกข้อสอบ AI', 'แฟลชการ์ด', 'สรุป PDF', 'สรุปชีท', 'ติวสอบ AI', 'ข้อสอบปรนัย AI', 'AI ช่วยเรียน ฟรี', 'Nova Study'],
   openGraph: {
     title: 'Nova Study | เรียนรู้เร็วขึ้นด้วย AI',
     description: 'สรุป ออกข้อสอบ แฟลชการ์ด และถาม-ตอบ จากไฟล์เรียนของคุณ',

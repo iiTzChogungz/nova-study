@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { BILLING_ENABLED } from '@/lib/plans'
 import { stripe, appUrl } from '@/lib/stripe'
 import { PRICING, APP_NAME, type BillingInterval } from '@/lib/plans'
 
 export async function POST(request: Request) {
+  if (!BILLING_ENABLED) return NextResponse.json({ error: 'Billing is disabled' }, { status: 404 })
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

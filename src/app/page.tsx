@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { GraduationCap, Sparkles, Brain, Layers, MessageCircleQuestion, FileUp, Check, Lock } from 'lucide-react'
-import { PRICING, PLAN_LIMITS } from '@/lib/plans'
+import { PRICING, PLAN_LIMITS, BILLING_ENABLED } from '@/lib/plans'
 
 const FEATURES = [
   { icon: Sparkles, title: 'สรุปทันที', body: 'แปลงตำราหนาๆ เป็นสรุปสั้นๆ อ่านจบใน 1 นาที', tint: 'bg-blue-100 text-blue-600' },
@@ -10,9 +10,9 @@ const FEATURES = [
 ]
 
 const FAQ = [
+  ['ใช้ฟรีจริงไหม?', 'ฟรีจริง ทุกฟีเจอร์ มีโควตาต่อวันเพื่อให้ทุกคนได้ใช้อย่างทั่วถึง โควตาจะรีเซ็ตทุกวัน'],
   ['รองรับไฟล์อะไรบ้าง?', 'PDF, รูปภาพ (PNG, JPG, WEBP) และไฟล์ข้อความ ขนาดไม่เกิน 10MB รองรับทั้งภาษาไทยและอังกฤษ'],
   ['ไฟล์ของฉันปลอดภัยไหม?', 'ไฟล์ถูกเก็บแบบส่วนตัว เฉพาะบัญชีของคุณเท่านั้นที่เข้าถึงได้ และคุณลบได้ทุกเมื่อ'],
-  ['ยกเลิกแพ็กเกจ Pro ได้ไหม?', 'ได้ทุกเมื่อจากหน้าแพ็กเกจ คุณจะใช้ Pro ได้ต่อจนครบรอบบิลที่ชำระแล้ว'],
   ['AI ตอบผิดได้ไหม?', 'ได้ AI อาจผิดพลาด ควรตรวจสอบกับเอกสารต้นฉบับก่อนนำไปสอบหรือใช้งานจริง'],
 ]
 
@@ -21,10 +21,11 @@ export default function Home() {
   const p = PLAN_LIMITS.pro
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebApplication', name: 'Nova Study', applicationCategory: 'EducationalApplication', operatingSystem: 'Web', inLanguage: 'th', description: 'ติวเตอร์ AI สรุปบทเรียน ออกข้อสอบ แฟลชการ์ด จากไฟล์ PDF และรูปภาพ', offers: { '@type': 'Offer', price: '0', priceCurrency: 'THB' } }) }} />
       <nav className="flex items-center justify-between px-6 py-5 max-w-6xl mx-auto">
         <div className="flex items-center gap-2 font-black text-2xl text-blue-600"><GraduationCap className="w-8 h-8" />Nova Study</div>
         <div className="flex items-center gap-3 sm:gap-5">
-          <a href="#pricing" className="hidden sm:block text-slate-600 font-medium hover:text-slate-900">ราคา</a>
+          {BILLING_ENABLED && <a href="#pricing" className="hidden sm:block text-slate-600 font-medium hover:text-slate-900">ราคา</a>}
           <Link href="/login" className="text-slate-600 font-medium hover:text-slate-900">เข้าสู่ระบบ</Link>
           <Link href="/register" className="bg-blue-600 text-white px-5 py-2.5 rounded-full font-bold hover:bg-blue-700">เริ่มฟรี</Link>
         </div>
@@ -41,9 +42,9 @@ export default function Home() {
             อัปโหลดชีท สไลด์ หรือรูปโน้ต แล้ว Nova Study จะสรุป ออกข้อสอบ ทำแฟลชการ์ด และตอบทุกคำถามจากเนื้อหาของคุณ
           </p>
           <Link href="/register" className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30">
-            <FileUp className="w-5 h-5" />ลองฟรี ไม่ต้องใช้บัตรเครดิต
+            <FileUp className="w-5 h-5" />เริ่มใช้ฟรีเลย
           </Link>
-          <p className="text-sm text-slate-400 mt-4">ฟรีทุกวัน {f.upload} ไฟล์ · {f.query} คำสั่ง AI</p>
+          <p className="text-sm text-slate-400 mt-4">ใช้ฟรี ไม่ต้องใช้บัตรเครดิต · ทุกวัน {f.upload} ไฟล์ · {f.query} คำสั่ง AI</p>
         </section>
 
         <section className="max-w-6xl mx-auto px-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-24">
@@ -70,7 +71,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="pricing" className="max-w-4xl mx-auto px-6 py-24">
+        {BILLING_ENABLED && <section id="pricing" className="max-w-4xl mx-auto px-6 py-24">
           <h2 className="text-3xl font-black text-center mb-3">ราคาที่นักเรียนจ่ายไหว</h2>
           <p className="text-center text-slate-500 mb-12">เริ่มฟรี อัปเกรดเมื่อพร้อม ยกเลิกได้ทุกเมื่อ</p>
           <div className="grid md:grid-cols-2 gap-8">
@@ -98,7 +99,7 @@ export default function Home() {
               <Link href="/register" className="block text-center py-3 rounded-xl bg-white text-blue-600 font-bold hover:bg-blue-50">สมัครแล้วอัปเกรด</Link>
             </div>
           </div>
-        </section>
+        </section>}
 
         <section className="max-w-3xl mx-auto px-6 pb-24">
           <h2 className="text-3xl font-black text-center mb-10">คำถามที่พบบ่อย</h2>

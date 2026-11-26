@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
+import { BILLING_ENABLED } from '@/lib/plans'
 import { Send, Loader2, Sparkles, BookOpen, HelpCircle, Brain, AlignLeft, FlaskConical, AlertCircle, Layers, Lock, RotateCcw, Check, X } from 'lucide-react'
 
 type Row = { id?: string; action: string; message: string; response: string }
@@ -111,7 +112,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
       <AlertCircle className="w-5 h-5 shrink-0" />
       <div>
         <p>{error.msg}</p>
-        {error.upgrade && <Link href="/dashboard/billing" className="inline-block mt-2 font-bold underline">ดูแพ็กเกจ Pro →</Link>}
+        {error.upgrade && BILLING_ENABLED && <Link href="/dashboard/billing" className="inline-block mt-2 font-bold underline">ดูแพ็กเกจ Pro →</Link>}
       </div>
     </div>
   )
@@ -142,7 +143,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4"><Sparkles className="w-5 h-5 text-blue-500" />อยากให้ AI ช่วยอะไร?</h2>
             <div className="grid gap-3">
               {ACTIONS.map((a) => {
-                const locked = 'pro' in a && a.pro && plan !== 'pro'
+                const locked = BILLING_ENABLED && 'pro' in a && a.pro && plan !== 'pro'
                 return (
                   <button key={a.id} disabled={!ready} onClick={() => { setSelected(a.id); setError(null) }}
                     className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 text-left transition-all disabled:opacity-50">

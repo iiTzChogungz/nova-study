@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { generate, FAST_MODEL, PRO_MODEL } from '@/lib/gemini'
 import { checkUsageLimit, getPlan, recordUsage } from '@/lib/usage'
-import { PRO_ONLY_ACTIONS } from '@/lib/plans'
+import { PRO_ONLY_ACTIONS, BILLING_ENABLED } from '@/lib/plans'
 
 export const maxDuration = 60
 
@@ -42,11 +42,11 @@ export async function POST(request: Request) {
     }
 
     const plan = await getPlan(user.id)
-    if ((PRO_ONLY_ACTIONS as readonly string[]).includes(action) && plan !== 'pro') {
+    if (BILLING_ENABLED && (PRO_ONLY_ACTIONS as readonly string[]).includes(action) && plan !== 'pro') {
       return NextResponse.json({ error: 'ฟีเจอร์นี้สำหรับสมาชิก Pro', code: 'PRO_ONLY' }, { status: 402 })
     }
     if (!(await checkUsageLimit(user.id, 'query'))) {
-      return NextResponse.json({ error: 'ใช้โควตา AI ครบแล้ว — อัปเกรดเป็น Pro เพื่อใช้ต่อ', code: 'LIMIT' }, { status: 403 })
+      return NextResponse.json({ error: 'ใช้โควตา AI ของวันนี้ครบแล้ว กลับมาใหม่พรุ่งนี้นะ', code: 'LIMIT' }, { status: 403 })
     }
 
     const { data: document } = await supabase
