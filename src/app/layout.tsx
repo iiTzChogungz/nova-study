@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Geist_Mono, Noto_Sans_Thai } from 'next/font/google'
 import './globals.css'
 
-const sansTh = Noto_Sans_Thai({ variable: '--font-sans-th', subsets: ['thai', 'latin'] })
+const sansTh = Noto_Sans_Thai({ variable: '--font-sans-th', subsets: ['thai', 'latin'], weight: ['400', '500', '700', '800', '900'] })
 const mono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 const url = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
