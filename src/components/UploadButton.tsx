@@ -86,8 +86,8 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
   }
 
   const styles = {
-    primary: "bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl px-4 py-2.5 inline-flex items-center gap-2 transition-all shadow-sm hover:shadow active:scale-[0.98]",
-    outline: "bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 font-medium rounded-xl px-4 py-2.5 inline-flex items-center gap-2 transition-all shadow-sm active:scale-[0.98]"
+    primary: "btn btn-green",
+    outline: "btn btn-green"
   }
 
   return (
@@ -99,7 +99,7 @@ export default function UploadButton({ variant = 'outline' }: { variant?: 'prima
 
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl relative animate-in zoom-in-95 duration-200">
+          <div className="pop-card w-full max-w-md p-8 shadow-2xl relative animate-in zoom-in-95 duration-200">
             {!isUploading && (
               <button onClick={() => setIsOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />

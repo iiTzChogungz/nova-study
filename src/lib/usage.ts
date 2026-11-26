@@ -51,3 +51,17 @@ export async function recordUsage(userId: string, type: UsageType) {
   const supabase = await createClient()
   await supabase.from('usage_events').insert({ user_id: userId, type, count: 1 })
 }
+
+// Consecutive days (UTC) with at least one AI query, ending today or yesterday.
+export async function getStreak(userId: string): Promise<number> {
+  const supabase = await createClient()
+  const since = new Date(Date.now() - 60 * 86400000).toISOString()
+  const { data } = await supabase
+    .from('usage_events').select('created_at').eq('user_id', userId).eq('type', 'query').gte('created_at', since)
+  const days = new Set((data || []).map((r) => r.created_at.slice(0, 10)))
+  const day = (offset: number) => new Date(Date.now() - offset * 86400000).toISOString().slice(0, 10)
+  let i = days.has(day(0)) ? 0 : 1
+  let streak = 0
+  while (days.has(day(i))) { streak++; i++ }
+  return streak
+}

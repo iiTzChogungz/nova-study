@@ -11,12 +11,12 @@ type Quiz = { questions: { question: string; options: string[]; answer: number; 
 type Cards = { cards: { front: string; back: string }[] }
 
 const ACTIONS = [
-  { id: 'summarize', icon: AlignLeft, label: 'สรุปย่อ', desc: 'ภาพรวมและประเด็นสำคัญภายใน 1 นาที', color: 'bg-blue-600' },
-  { id: 'quiz', icon: Brain, label: 'สร้างข้อสอบ', desc: 'ข้อสอบปรนัย 8 ข้อ พร้อมเฉลยและคำอธิบาย', color: 'bg-purple-600' },
-  { id: 'flashcards', icon: Layers, label: 'แฟลชการ์ด', desc: 'การ์ดท่องจำ 12 ใบ พลิกเพื่อดูคำตอบ', color: 'bg-pink-600' },
-  { id: 'qa', icon: HelpCircle, label: 'ถาม-ตอบ', desc: 'ถามอะไรก็ได้เกี่ยวกับเอกสารนี้', color: 'bg-emerald-600' },
-  { id: 'detailed_summary', icon: BookOpen, label: 'สรุปละเอียด', desc: 'แยกตามหัวข้อ เจาะลึกทุกส่วน', color: 'bg-indigo-600', pro: true },
-  { id: 'report', icon: FlaskConical, label: 'รายงาน / Lab Report', desc: 'บทนำ วิธีการ ผลลัพธ์ อภิปราย สรุป', color: 'bg-orange-600', pro: true },
+  { id: 'summarize', btn: 'btn-blue', icon: AlignLeft, label: 'สรุปย่อ', desc: 'ภาพรวมและประเด็นสำคัญภายใน 1 นาที', color: 'bg-blue-600' },
+  { id: 'quiz', btn: 'btn-violet', icon: Brain, label: 'สร้างข้อสอบ', desc: 'ข้อสอบปรนัย 8 ข้อ พร้อมเฉลยและคำอธิบาย', color: 'bg-purple-600' },
+  { id: 'flashcards', btn: 'btn-pink', icon: Layers, label: 'แฟลชการ์ด', desc: 'การ์ดท่องจำ 12 ใบ พลิกเพื่อดูคำตอบ', color: 'bg-pink-600' },
+  { id: 'qa', btn: 'btn-green', icon: HelpCircle, label: 'ถาม-ตอบ', desc: 'ถามอะไรก็ได้เกี่ยวกับเอกสารนี้', color: 'bg-emerald-600' },
+  { id: 'detailed_summary', btn: 'btn-blue', icon: BookOpen, label: 'สรุปละเอียด', desc: 'แยกตามหัวข้อ เจาะลึกทุกส่วน', color: 'bg-indigo-600', pro: true },
+  { id: 'report', btn: 'btn-yellow', icon: FlaskConical, label: 'รายงาน / Lab Report', desc: 'บทนำ วิธีการ ผลลัพธ์ อภิปราย สรุป', color: 'bg-orange-600', pro: true },
 ] as const
 
 function parse<T>(s: string | undefined): T | null {
@@ -36,7 +36,7 @@ function QuizView({ data }: { data: Quiz }) {
         </div>
       )}
       {data.questions.map((q, i) => (
-        <div key={i} className="bg-white border border-slate-200 rounded-2xl p-5">
+        <div key={i} className="bg-white border-2 border-ink/15 rounded-2xl p-5 shadow-[0_4px_0_rgb(30_27_75/0.12)]">
           <p className="font-bold text-slate-900 mb-3">{i + 1}. {q.question}</p>
           <div className="space-y-2">
             {q.options.map((o, j) => {
@@ -76,8 +76,8 @@ function CardsView({ data }: { data: Cards }) {
         <span className={`block mt-4 text-xs font-medium ${flip ? 'text-pink-200' : 'text-slate-400'}`}>{flip ? 'คำตอบ' : 'แตะเพื่อพลิกดูคำตอบ'}</span>
       </button>
       <div className="flex justify-between mt-5">
-        <button onClick={() => go(-1)} className="px-5 py-2 rounded-full bg-slate-100 font-bold text-slate-600">ก่อนหน้า</button>
-        <button onClick={() => go(1)} className="px-5 py-2 rounded-full bg-pink-600 text-white font-bold">ถัดไป</button>
+        <button onClick={() => go(-1)} className="btn btn-white">ก่อนหน้า</button>
+        <button onClick={() => go(1)} className="btn btn-pink">ถัดไป</button>
       </div>
     </div>
   )
@@ -119,7 +119,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
 
   return (
     <div className="grid lg:grid-cols-2 gap-6">
-      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden h-[40vh] lg:h-[78vh] lg:sticky lg:top-6">
+      <div className="pop-card overflow-hidden h-[40vh] lg:h-[78vh] lg:sticky lg:top-6">
         {document.file_type === 'application/pdf' && document.previewUrl ? (
           <iframe src={document.previewUrl} className="w-full h-full" title={document.title} />
         ) : document.file_type.startsWith('image/') && document.previewUrl ? (
@@ -130,7 +130,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
         )}
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-3xl p-5 md:p-6 min-h-[50vh]">
+      <div className="pop-card p-5 md:p-6 min-h-[50vh]">
         {!ready && (
           <div className={`p-4 rounded-xl flex gap-3 text-sm mb-4 ${document.failed ? 'bg-red-50 text-red-800' : 'bg-yellow-50 text-yellow-800'}`}>
             <AlertCircle className="w-5 h-5 shrink-0" />
@@ -140,14 +140,14 @@ export default function DocumentViewer({ document, history, plan }: { document: 
 
         {!active && (
           <>
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4"><Sparkles className="w-5 h-5 text-blue-500" />อยากให้ AI ช่วยอะไร?</h2>
+            <h2 className="text-xl font-black flex items-center gap-2 mb-4"><Sparkles className="w-5 h-5 text-blue-500" />อยากให้ AI ช่วยอะไร?</h2>
             <div className="grid gap-3">
               {ACTIONS.map((a) => {
                 const locked = BILLING_ENABLED && 'pro' in a && a.pro && plan !== 'pro'
                 return (
                   <button key={a.id} disabled={!ready} onClick={() => { setSelected(a.id); setError(null) }}
-                    className="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 text-left transition-all disabled:opacity-50">
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white ${a.color}`}><a.icon className="w-5 h-5" /></div>
+                    className="flex items-center gap-4 p-4 rounded-2xl border-2 border-ink/15 shadow-[0_4px_0_rgb(30_27_75/0.15)] hover:-translate-y-0.5 hover:border-ink text-left transition-all disabled:opacity-50 bg-white">
+                    <div className={`w-12 h-12 rounded-2xl border-2 border-ink/20 flex items-center justify-center text-white ${a.color}`}><a.icon className="w-5 h-5" /></div>
                     <div className="flex-1">
                       <p className="font-bold text-slate-900 flex items-center gap-2">{a.label}{locked && <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1"><Lock className="w-3 h-3" />PRO</span>}</p>
                       <p className="text-sm text-slate-500">{a.desc}</p>
@@ -183,7 +183,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
                 <form onSubmit={(e) => { e.preventDefault(); if (input.trim() && !loading) run('qa', input) }} className="flex gap-2">
                   <input value={input} onChange={(e) => setInput(e.target.value)} maxLength={1000} placeholder="ถามคำถาม…" disabled={loading}
                     className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 outline-none focus:ring-2 focus:ring-emerald-500" />
-                  <button disabled={loading || !input.trim()} className="bg-emerald-600 text-white p-3 rounded-full disabled:opacity-50"><Send className="w-5 h-5" /></button>
+                  <button disabled={loading || !input.trim()} className="btn btn-green !p-3"><Send className="w-5 h-5" /></button>
                 </form>
               </div>
             ) : (
@@ -200,7 +200,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
                 ) : (
                   <div className="py-16 text-center">
                     <p className="text-slate-500 mb-6">{active.desc}</p>
-                    <button onClick={() => run(active.id)} disabled={!ready} className={`px-8 py-3 rounded-full font-bold text-white shadow-lg disabled:opacity-50 ${active.color}`}>เริ่มเลย</button>
+                    <button onClick={() => run(active.id)} disabled={!ready} className={`btn ${active.btn} text-lg px-10`}>เริ่มเลย</button>
                   </div>
                 )}
               </>
