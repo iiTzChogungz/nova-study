@@ -107,7 +107,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
     finally { setLoading(false) }
   }
 
-  const ErrorBox = () => error && (
+  const errorBox = error && (
     <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3 text-sm text-red-700 mb-4">
       <AlertCircle className="w-5 h-5 shrink-0" />
       <div>
@@ -166,7 +166,7 @@ export default function DocumentViewer({ document, history, plan }: { document: 
               <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white ${active.color}`}><active.icon className="w-4 h-4" /></div>
               <h3 className="font-bold text-slate-900">{active.label}</h3>
             </div>
-            <ErrorBox />
+            {errorBox}
 
             {active.id === 'qa' ? (
               <div className="flex flex-col h-[55vh]">
